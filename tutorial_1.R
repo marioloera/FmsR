@@ -9,7 +9,7 @@ setwd("C:/Users/MarioLoeraLozano/Dropbox/R/")
 
 # loading data
 load("2011-08-ABB.ST")
-
+# tq: 201285 obs. of 10 variables
 
 # 2 ---------------------------------
 # https://youtu.be/4FWbUh0T2U4
@@ -37,11 +37,12 @@ hist(tq$Volume, 50)
 # create a variable for time
 time = strptime(tq$Time, format="%H:%M:%OS"); 
 
-# add a column in tq with secconds
+# add a column in tq with seconds
 tq$Seconds = time$hour*3600 + time$min*60 + time$sec;
 
 # filter by time
 tq = tq[tq$Seconds > (9*3600) & tq$Seconds < (17*3600 + 25*60),]
+# tq: 200930 obs. of 10 variables
 head(tq[,2])
 tail(tq[,2])
 
@@ -147,5 +148,9 @@ table(tq$D)
 # 4.567386
 
 
+
 # 6 ----------------------------------
 # https://youtu.be/5XGY9Ree7Jk
+
+
+
