@@ -106,12 +106,8 @@ tq$Mid.Price = (tq$Ask.Price+tq$Bid.Price)/2
  from package zoo
  
  ******* 
-  need to be connected to internet
-  in R studio right bottom area, commonly know as  4 - Plots and files
-  click on Tools -> Install Packages 
-  Install from: Repository (CRAN)
-  Packages (separet multiple with space or comma): zoo
-
+ run this:
+  install.packages('zoo')
 "
 library(zoo)
 

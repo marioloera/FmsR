@@ -19,8 +19,8 @@ time = strptime(tq$Time, format="%H:%M:%OS");
 
 # add a column in tq with seconds
 tq$Seconds = time$hour*3600 + time$min*60 + time$sec;
-# tq: 194141 obs. of 10 variables
-
+tq = tq[tq$Seconds > (9*3600 + 5*60) & tq$Seconds < (17*3600 + 25*60),]
+# tq: 168391 obs. of 10 variables
 
 
 # 2.a
