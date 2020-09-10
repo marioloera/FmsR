@@ -1,9 +1,10 @@
 # clean workspace and variables
 rm(list = setdiff(ls(), lsf.str()))
 
+# packages needed
+library(plyr) # install.packages('plyr')
+library(zoo) # install.packages('zoo')
 
-# 1 ---------------------------------
-# https://youtu.be/uVgwDXAdTg0
 # set working directory
 setwd("C:/Users/MarioLoeraLozano/Dropbox/R/")
 
@@ -23,145 +24,73 @@ tq = tq[tq$Seconds > (9*3600 + 5*60) & tq$Seconds < (17*3600 + 25*60),]
 # tq: 168391 obs. of 10 variables
 
 
-# 2.a
+# Preview data
 head(tq)
-
-# 2.b
 tail(tq) 
-
-# 2.c
-table(tq$Date)
-table(tq$Type)
-
-# 2.d
 hist(tq$Price)
-
 hist(tq$Volume, 100)
 
-
-
-
-hist(tq$Seconds)
-
 plot(tq$Seconds, type = 'l')
-
 plot(tq$Price, type = 'l')
-
 plot(tq$Volume, type = 'l')
 
-
-
-
-
-
-# filter by time
-tq = tq[tq$Seconds > (9*3600) & tq$Seconds < (17*3600 + 25*60),]
-# tq: 170235 obs. of 10 variables
-
-head(tq[,2])
-tail(tq[,2])
-
-# filter by mechanism and Type
-tq = tq[tq$Type == 'Quote',]
-# tq: 200728 obs. of 11 variables
-
-# 4 ---------------------------------
-
-# https://youtu.be/Y7_SjC1rnOg
-
-" Calculate relative quoted spread "
-
-# add column Abs.spread, mid price
-# a = ask price
-# b = bid price
-# S = Absolute Spread  = a - b
-# m = mid.price = (a+b)/2
-
-
-mean(tq$Ask.Price) # NA
-mean(tq$Ask.Price , na.rm = 'TRUE') # 127.3869
-
-
+# add Absolute Spread
 tq$Abs.Spread = tq$Ask.Price-tq$Bid.Price
+
+# add Mid Price and Locf
 tq$Mid.Price = (tq$Ask.Price+tq$Bid.Price)/2
-# tq: 200728 obs. of 13 variables
-
-
-# s = relative spread = S/m 
-# average relative spread in basis points
-# filter na.rm = 'TRUE'
-10000 * mean(tq$Abs.Spread / tq$Mid.Price, na.rm = 'TRUE') 
-# 11.47669
-
-
-
-# **** weighted ave relative spread
-"
-  weighted.mean(x, w, .)
-  
-  diff {base}	Lagged Differences
-  
-  function diff(tq$seconds) gives the diff between row_n and row_n+1
-"
-# method 1:  adding 0 at the of diff 
-10000 * weighted.mean(tq$Abs.Spread/tq$Mid.Price, append(diff(tq$Seconds),0,NROW(tq)-1), na.rm = 'TRUE')
-
-# method 2: take observation 0 to N-1
-10000 * weighted.mean((tq$Abs.Spread/tq$Mid.Price)[1:NROW(tq)-1], diff(tq$Seconds), na.rm = 'TRUE')
-# 9.924343
-
-# 5 ----------------------------------
-# https://youtu.be/Cro4WTrmVNI
-
-
-"
- na.locf Last Observation Carried Forward
- Generic function for replacing each NA
- with the most recent non-NA prior to it.
- from package zoo
- 
- ******* 
-  need to be connected to internet
-  in R studio right bottom area, commonly know as  4 - Plots and files
-  click on Tools -> Install Packages 
-  Install from: Repository (CRAN)
-  Packages (separet multiple with space or comma): zoo
-
-"
-library(zoo)
-
-"
- Se = efective spread
- p = transaction price 
- m = mid price
- d = direction of the trade: +1 for buy, -1 for sell
-Lee-Ready algorithm:  
- if P > m  then d= 1  a buyer initiated the trade by crossing the spread
- if P < m  then d=-1  a seller init the trade by crossing the spread
- Se = d(p-m)/m  = abs(p-m)/m
- abs(transaction Price - Mid.Price)
-"
-
-# fill the gaps in the Mid.Price
 tq$Mid.Price = na.locf(tq$Mid.Price);
+# tq: 168391 obs. of 12 variables
 
-# get the direction of the trade
-tq$D = sign(tq$Price - tq$Mid.Price)
-#this can be useful to illustrate if sellers/ buyers 
-#had initiated the trades 
-table(tq$D)
-"-1     0     1 
-10827   832  8718"
+# get traiding days in a vector
+trading.days = levels(factor(tq$Date))
 
-# effective spread
-10000 * mean(tq$D * (tq$Price - tq$Mid.Price) / tq$Mid.Price, na.rm = 'TRUE')
-10000 * mean(abs(tq$Price - tq$Mid.Price) / tq$Mid.Price, na.rm = 'TRUE')
-# in order to compare quoted spread vs effective spread need to multiple effective spread * 2
+# define a data frame report
+report <- data.frame(
+  day = trading.days,
+  obs = NA,
+  vol.sek = NA, # trade volueme sek
+  s.bsp = NA, # quoted spread bsp 
+  w_s.bsp = NA, #  weighted quoted spread bsp
+  se.bsp = NA, #  effective spread bsp
+  w_se.bsp = NA, # weighted effective spread bsp
+  ilr.bsp = NA # illiquidity ratio bsp
+)
+report
+# report 5 obs. of 8 variables
 
-# weighted effective spread with volume
-10000 * weighted.mean((abs(tq$Price - tq$Mid.Price) / tq$Mid.Price), tq$Volume, na.rm = 'TRUE')
-# 4.567386
+# calculate meas for each traiding day
+for(day in trading.days){
+  
+  # save data for one day in td
+  td = tq[tq$Date == day, ]
+  
+  # transform day to index
+  i = which(trading.days %in% day)
+  
+  # observation per day
+  report$obs[i] = count(td$Date)[2]
+  
+  # a. The quoted spread, reported in basis points
+  report$s.bsp[i] = 10000 * mean((td$Abs.Spread / td$Mid.Price), na.rm = 'TRUE') 
+  
+  # a.* weighted quoted spread
+  report$w_s.bsp[i] = 10000 * weighted.mean((td$Abs.Spread/td$Mid.Price)[1:NROW(td)-1], diff(td$Seconds), na.rm = 'TRUE')
+  
+  # b. The total trading volume, reported in million SEK
+  report$vol.sek[i] = sum((td$Volume * td$Price), na.rm = 'TRUE')
+  
+  # c. The effective spread, reported in basis points
+  report$se.bsp[i] = 10000 * mean(abs(td$Price - td$Mid.Price) / td$Mid.Price, na.rm = 'TRUE')
+  
+  # c.* weighted effective spread
+  report$w_se.bsp[i] = 10000 * weighted.mean((abs(tq$Price - tq$Mid.Price) / tq$Mid.Price), tq$Volume, na.rm = 'TRUE')
+  
+  # d. The illiquidity ratio by Amihud (2002), reported in percent per million SEK
+  # TODO
+}
+report
 
 
-# 6 ----------------------------------
-# https://youtu.be/5XGY9Ree7Jk
+# Get the average per day
+# TODO
