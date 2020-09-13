@@ -140,7 +140,7 @@ table(tq$D)
 # in order to compare quoted spread vs effective spread need to multiple effective spread * 2
 
 # weighted effective spread with volume
-10000 * weighted.mean((abs(tq$Price - tq$Mid.Price) / tq$Mid.Price), tq$Volume, na.rm = 'TRUE')
+10000 * weighted.mean(abs(tq$Price - tq$Mid.Price) / tq$Mid.Price, tq$Volume, na.rm = 'TRUE')
 # 4.567386
 
 
