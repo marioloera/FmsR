@@ -89,3 +89,4 @@ for(i in 1:dim(avgweek.report)[2]) {
 }
 avgweek.report
 w2
+round(w2, 2)
