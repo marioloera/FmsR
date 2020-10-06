@@ -3,4 +3,5 @@
 *.docx
 *.ST
 SKFb_Mar2020_1week
--.Rhistory
+.Rhistory
+.RData
