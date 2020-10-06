@@ -56,13 +56,13 @@ trading.days = levels(factor(tq$Date))
 # define a data frame report
 report <- data.frame(
   day = trading.days,
-  obs = 0,
-  vol.sek = NA, # trade volueme sek
-  s.bsp = NA, # quoted spread bsp 
-  w_s.bsp = NA, #  weighted quoted spread bsp
-  se.bsp = NA, #  effective spread bsp
-  w_se.bsp = NA, # weighted effective spread bsp
-  ilr.bsp = NA # illiquidity ratio bsp
+  obs = NaN,
+  vol.sek = NaN, # trade volueme sek
+  s.bsp = NaN, # quoted spread bsp 
+  w_s.bsp = NaN, #  weighted quoted spread bsp
+  se.bsp = NaN, #  effective spread bsp
+  w_se.bsp = NaN, # weighted effective spread bsp
+  ilr.bsp = NaN # illiquidity ratio bsp
 )
 
 # calculate meas for each traiding day
@@ -77,15 +77,15 @@ for(day in trading.days){
   # observation per day
   report$obs[i] = count(td$Date)[[2]]
   
+  # b. The total trading volume, reported in million SEK
+  report$vol.sek[i] = sum((td$Volume * td$Price), na.rm = 'TRUE')
+  
   # a. The quoted spread, reported in basis points
   report$s.bsp[i] = 10000 * mean(td$s, na.rm = 'TRUE') 
   
   # a.* weighted quoted spread
   report$w_s.bsp[i] =
     10000 * weighted.mean(td$s[1:NROW(td)-1], diff(td$Seconds), na.rm = 'TRUE')
-  
-  # b. The total trading volume, reported in million SEK
-  report$vol.sek[i] = sum((td$Volume * td$Price), na.rm = 'TRUE')
   
   # c. The effective spread, reported in basis points
   report$se.bsp[i] = 10000 * mean(td$se, na.rm = 'TRUE')
@@ -100,6 +100,10 @@ for(day in trading.days){
 }
 
 report
+# using cbind to merge the day and the round of report, 
+# only numeric columns can be rounded
+cbind(report$day, round(report[,2:ncol(report)], 2))
+
 # report 5 obs. of 8 variables
 
 "
@@ -113,7 +117,12 @@ n = 3
 avgweek.report = report[1, n:(ncol(report))]
 
 for(i in 1:dim(avgweek.report)[2]) {
-  avgweek.report[i] = weighted.mean(report[,n-1+i], report$obs, na.rm = 'TRUE')
+  #avgweek.report[i] = weighted.mean(report[,n-1+i], report$obs, na.rm = 'TRUE')
+  avgweek.report[i] = mean(report[,n-1+i], na.rm = 'TRUE')
+  
 }
-avgweek.report
+round(avgweek.report, 2)
 # avgweek.report 1 obs. of 6 variables
+
+
+#(report$w_s.bsp - 2*report$w_se.bsp)/report$w_s.bsp
