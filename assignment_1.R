@@ -85,8 +85,8 @@ for(day in trading.days){
   
   # a.* weighted quoted spread
   report$w_s.bsp[i] =
-    10000 * weighted.mean(td$s[1:NROW(td)-1], diff(td$Seconds), na.rm = 'TRUE')
-  
+    10000 * weighted.mean(td$s, c(diff(td$Seconds), 0) , na.rm = T)
+
   # c. The effective spread, reported in basis points
   report$se.bsp[i] = 10000 * mean(td$se, na.rm = 'TRUE')
   
