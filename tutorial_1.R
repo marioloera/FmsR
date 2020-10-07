@@ -147,6 +147,100 @@ table(tq$D)
 
 # 6 ----------------------------------
 # https://youtu.be/5XGY9Ree7Jk
+# Price impact regression
+
+# Create half-hourly data
+halfhours = seq(9, 17.5, 0.5) * 3600
+
+# create function to apply to each half hour
+# we sent row number as input
+
+price.impact.data = function(rows){
+  # subset of data
+  tq_half = tq[rows, ]
+  
+  # Mid.Price at the beginning of the half hour
+  m_start = head(tq_half$Mid.Price, 1)
+
+  # Mid.Price at the end of the half hour
+  m_end = tail(tq_half$Mid.Price, 1)
+  
+  #order imbalance qt = sum (d_j*vol_j) 
+  q = sum(tq_half$D * tq_half$Volume, na.rm = TRUE)
+  
+  c(m_start, m_end, q)
+  
+}
 
 
+head(findInterval(tq$Seconds, halfhours))
+tail(findInterval(tq$Seconds, halfhours))
 
+halfhourPI = aggregate(
+  1:nrow(tq), 
+  by = list(
+      findInterval(tq$Seconds, halfhours),
+      tq$Date
+      ),
+  price.impact.data
+  )
+
+head(halfhourPI, 2)
+"
+Group.1  Group.2       x.1       x.2       x.3
+1       1 20110822    124.40    125.00 -31906.00
+2       2 20110822    125.00    125.85  -7170.00
+"
+
+# rename
+dimnames(halfhourPI$x)[[2]] = c("startPrice", "endPrice", "q")
+
+head(halfhourPI, 2)
+"
+  Group.1  Group.2 x.startPrice x.endPrice       x.q
+1       1 20110822       124.40     125.00 -31906.00
+2       2 20110822       125.00     125.85  -7170.00
+"
+
+# delta mid prices ** DEPENDENT VARIABLE
+dM = log(halfhourPI$x[, "endPrice"]) - log(halfhourPI$x[, "startPrice"])
+
+# order imbalance in percentage *** INDEPENDET VARIABLE
+Q = halfhourPI$x[, "q"] / sum(tq$Volume, na.rm = T)
+
+# Regresion, dM on Q , linnear model
+
+lamda = lm(dM ~ Q)
+"
+Call:
+lm(formula = dM ~ Q)
+
+Coefficients:
+(Intercept)            Q  
+  0.0002182    0.8531025 
+"
+summary(lamda)
+"
+Call:
+lm(formula = dM ~ Q)
+
+Residuals:
+       Min         1Q     Median         3Q        Max 
+-0.0101984 -0.0031244 -0.0003873  0.0029535  0.0160961 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 0.0002182  0.0005405   0.404 0.687481    
+Q           0.8531025  0.2375058   3.592 0.000555 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.004914 on 83 degrees of freedom
+Multiple R-squared:  0.1345,	Adjusted R-squared:  0.1241 
+F-statistic:  12.9 on 1 and 83 DF,  p-value: 0.000555
+"
+
+"
+  CONCLUSIONS 
+  lamnda = 0.8531025 and  p.value is less than 1% -> higly statisticall significant
+"
