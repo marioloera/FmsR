@@ -143,6 +143,11 @@ table(tq$D)
 10000 * weighted.mean(abs(tq$Price - tq$Mid.Price) / tq$Mid.Price, tq$Volume, na.rm = 'TRUE')
 # 4.567386
 
+# order flow
+tq$Q = tq$Volume * tq$D
+# tq: 200728 obs. of 15 variables
+
+save(tq, file ='tqData')
 
 
 # 6 ----------------------------------
@@ -244,3 +249,5 @@ F-statistic:  12.9 on 1 and 83 DF,  p-value: 0.000555
   CONCLUSIONS 
   lamnda = 0.8531025 and  p.value is less than 1% -> higly statisticall significant
 "
+
+
