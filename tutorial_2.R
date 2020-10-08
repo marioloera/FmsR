@@ -7,8 +7,9 @@ rm(list = setdiff(ls(), lsf.str()))
 # 1 ---------------------------------
 # https://youtu.be/KI0KBZcty18
 # load data saved in tutorial 1
-load("tqData")
+load("Data/tqData")
 # tq: 200728 obs. of 15 variables
+
 "
   make a supset using only Trades obsrvations
   and where the dirrecion of the trade different than 0

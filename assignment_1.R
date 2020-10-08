@@ -9,7 +9,7 @@ library(zoo) # install.packages('zoo')
 setwd("C:/Users/MarioLoeraLozano/Dropbox/R/")
 
 # loading data
-load("SKFb_Mar2020_1week")
+load("Data/SKFb_Mar2020_1week")
 # tq: 194141 obs. of 9 variables
 
 " filter by time exlude obeservation outside 

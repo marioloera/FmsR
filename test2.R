@@ -5,7 +5,7 @@ library(zoo) # install.packages('zoo')
 
 setwd("C:/Users/MarioLoeraLozano/Dropbox/R/")
 
-load("SKFb_Mar2020_1week")
+load("Data/SKFb_Mar2020_1week")
 
 # Preview data
 head(tq)

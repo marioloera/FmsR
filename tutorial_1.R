@@ -8,7 +8,7 @@ rm(list = setdiff(ls(), lsf.str()))
 setwd("C:/Users/MarioLoeraLozano/Dropbox/R/")
 
 # loading data
-load("2011-08-ABB.ST")
+load("Data/2011-08-ABB.ST")
 # tq: 201285 obs. of 10 variables
 
 # 2 ---------------------------------
@@ -147,7 +147,7 @@ table(tq$D)
 tq$Q = tq$Volume * tq$D
 # tq: 200728 obs. of 15 variables
 
-save(tq, file ='tqData')
+save(tq, file ='Data/tqData')
 
 
 # 6 ----------------------------------
@@ -249,5 +249,3 @@ F-statistic:  12.9 on 1 and 83 DF,  p-value: 0.000555
   CONCLUSIONS 
   lamnda = 0.8531025 and  p.value is less than 1% -> higly statisticall significant
 "
-
-

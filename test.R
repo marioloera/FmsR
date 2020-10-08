@@ -6,7 +6,7 @@ rm(list = setdiff(ls(), lsf.str()))
 setwd("C:/Users/MarioLoeraLozano/Dropbox/R/")
 
 # loading data
-load("2011-08-ABB.ST")
+load("Data/2011-08-ABB.ST")
 # tq: 201285 obs. of 10 variables
 
 # create a variable for time
