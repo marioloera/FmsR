@@ -95,6 +95,9 @@ tq$Mid.Price = (tq$Ask.Price+tq$Bid.Price)/2
 10000 * weighted.mean((tq$Abs.Spread/tq$Mid.Price)[1:NROW(tq)-1], diff(tq$Seconds), na.rm = 'TRUE')
 # 9.924343
 
+10000 * weighted.mean(tq$Abs.Spread/tq$Mid.Price, c(diff(tq$Seconds), 0), na.rm = 'TRUE')
+
+
 # 5 ----------------------------------
 # https://youtu.be/Cro4WTrmVNI
 
