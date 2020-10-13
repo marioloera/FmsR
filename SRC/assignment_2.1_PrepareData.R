@@ -39,9 +39,5 @@ tq$s = tq$Abs.Spread / tq$Mid.Price
 # add effective spread se
 tq$se = abs(tq$Price - tq$Mid.Price) / tq$Mid.Price
 
-# save data with need it columns
-tq = tq[, 
-        c("Date", "Seconds", "Price", "Volume", "D", "Q", "se", "Mid.Price", 
-          "s", "Abs.Spread")];
 save(tq, file ='tqAssigment2')
-# tq: 780106 obs. of 10 variables
+# tq: 780106 obs. of 16 variables
