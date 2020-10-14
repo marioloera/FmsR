@@ -1,5 +1,5 @@
 # set working directory
-setwd("C:/Users/MarioLoeraLozano/Dropbox/R/")
+setwd("C:/Users/MarioLoeraLozano/Dropbox/R/Data")
 
 # clean workspace and variables
 rm(list = setdiff(ls(), lsf.str()))
@@ -24,7 +24,9 @@ tt = tq[tq$Type == "Trade" & tq$D != 0,
 tt$dP = c(NA, diff(tt$Price));
 tt$dD = c(NA, diff(tt$D));
 tt$dQ = c(NA, diff(tt$Q));
-# tt: 19545 obs. of 9 variables
+# tt: 198893 obs. of 9 variables
+
+save(tt, file ='ttAssigment2_zadka')
 
 # 3 ---------------------------------
 # https://youtu.be/GoNHYH7fot0
