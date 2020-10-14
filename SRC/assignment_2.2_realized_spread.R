@@ -82,6 +82,9 @@ for(day in trading.days){
 }
 
 report
+
+save(report, file ='Data/reportAssigment2')
+
 library(lattice) # install.packages('lattice')
 
 require(lattice)
