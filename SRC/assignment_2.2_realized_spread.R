@@ -12,12 +12,11 @@ load("Data/tqAssigment2")
 
 "
   make a supset using only Trades obsrvations
-  and where the dirrecion of the trade different than 0
 "
 
-tt = tq[tq$Type == "Trade" & tq$D != 0, 
+tt = tq[tq$Type == "Trade", 
         c("Date", "Seconds", "se", "Price", "Volume", "D", "Q", "Mid.Price")];
-# tt: 198893 obs. of 8 variables
+# tt: 205405 obs. of 9 variables
 
 # match trades with future quotes
 # install.packages("data.table")
@@ -27,73 +26,82 @@ lagPrices = function(trades = tt, quotes = tq, delay = 60 * 5, variable = "Mid.P
   cq = c("Date", "Seconds", "Mid.Price", "Ask.Price", "Bid.Price");
   dq = data.table(quotes[quotes$Type == "Quote", cq]);
   
-  ct = c("Date", "Seconds", "Price", "Volume", "D", "Mid.Price");
+  ct = c("Date", "Seconds", "Price", "Volume", "D", "Mid.Price", "se");
   dt = data.table(trades[, ct], key = c("Date", "Seconds"));
   
   setkey(dq, cols = Date, Seconds);
   ix = dq[dt, roll = T, which = T, mult = "last"];
   
-  # eval(parse(text = paste0("dt$Delay.",delay,".",variable,"=dq$",variable,"[ix]")));
-  # without the delay 
+  #eval(parse(text = paste0("dt$Delay.",delay,".",variable,"=dq$",variable,"[ix]")));
+  # use variable with out delay qty
   eval(parse(text = paste0("dt$Delay.",variable,"=dq$",variable,"[ix]")));
   
   return(as.data.frame(dt));
 }
 
-tt_Lead = lagPrices(trades = tt, quotes = tq, delay = 60 * 1, variable = "Mid.Price")
+# get Mid.Price after one minute
+tt_1min = lagPrices(trades = tt, quotes = tq, delay = 60 * 1, variable = "Mid.Price")
 
 # realize spread after one minute
-tt$sr = tt$se - abs(tt_Lead$Delay.Mid.Price - tt_Lead$Price)/tt_Lead$Price
-# 198893 obs, of 9 variables
-
+tt$sr = tt$D*(tt$Price - tt_1min$Delay.Mid.Price) / tt$Mid.Price
 
 # get traiding days in a vector
-trading.days = levels(factor(tq$Date))
+trading.days = levels(factor(tt$Date))
 
 # define a data frame report
 report <- data.frame(
-  day = trading.days,
-  obs = NaN,
-  vol.sek = NaN, # trade volueme sek
-  s.bsp = NaN, # quoted spread bsp 
-  w_s.bsp = NaN, #  weighted quoted spread bsp
-  se.bsp = NaN, #  effective spread bsp
+  day = NaN,
+  date = trading.days,
+  w_s.bsp = NaN, # weighted quoted spread bsp 
   w_se.bsp = NaN, # weighted effective spread bsp
-  ilr.bsp = NaN # illiquidity ratio bsp
+  w_sr.bsp = NaN # weighted realized spread bsp
 )
 
 # calculate meas for each traiding day
 for(day in trading.days){
-  
-  # save data for one day in td
-  td = tq[tq$Date == day, ]
-  
+
   # transform day to index
   i = which(trading.days %in% day)
+  report$day[i] = i
   
-  # observation per day
-  report$obs[i] = count(td$Date)[[2]]
+  # tt_day = quote data for one day from tq
+  tq_day = tq[tq$Date == day, ]
   
-  # b. The total trading volume, reported in million SEK
-  report$vol.sek[i] = sum((td$Volume * td$Price), na.rm = 'TRUE')
-  
-  # a. The quoted spread, reported in basis points
-  report$s.bsp[i] = 10000 * mean(td$s, na.rm = 'TRUE') 
-  
-  # a.* weighted quoted spread
   report$w_s.bsp[i] =
-    10000 * weighted.mean(td$s, c(diff(td$Seconds), 0) , na.rm = T)
+    10000 * weighted.mean(tq_day$s, c(diff(tq_day$Seconds), 0) , na.rm = T)
 
-  # c. The effective spread, reported in basis points
-  report$se.bsp[i] = 10000 * mean(td$se, na.rm = 'TRUE')
+  # tt_day: trade data for one day from tt
+  tt_day = tt[tt$Date == day, ]
   
-  # c.* weighted effective spread
-  report$w_se.bsp[i] = 10000 * weighted.mean(td$se, td$Volume, na.rm = 'TRUE')
+  # weighted effective spread
+  report$w_se.bsp[i] = 10000 * weighted.mean(tt_day$se, tt_day$Volume, na.rm = T)
   
-  # d. The illiquidity ratio by Amihud (2002), 
-  # reported in percent per million SEK
-  # TODO
-  # report$ilr.bsp[i] =
+  # weighted realized spread
+  report$w_sr.bsp[i] = 10000 * weighted.mean(tt_day$sr, tt_day$Volume, na.rm = T)
+  
 }
 
 report
+library(lattice) # install.packages('lattice')
+
+require(lattice)
+
+# sugested figure 1)  w_s(green) & w_se (blue)
+xyplot(
+  w_s.bsp + w_se.bsp ~  day,
+  data = report,
+  type = c('l','l'),
+  col = c("green", "blue"),
+  auto.key = T
+)
+
+# suggested figure 2) w_se (blue) & w_sr (red)
+xyplot(
+  w_se.bsp + w_sr.bsp ~  day,
+  data = report,
+  type = c('l','l'),
+  col = c("blue", "red"),
+  auto.key = T
+  )
+
+
