@@ -44,12 +44,11 @@ outlierKD <- function(dt, var) {
     return(invisible(var_name))
   }
 }
-
-par(mar=c(1,1,1,1)) 
-outlierKD(tq,Price)
-y
-outlierKD(tq,Volume)
-y
+#par(mar=c(1,1,1,1)) 
+#outlierKD(tq,Price)
+#y
+#outlierKD(tq,Volume)
+#y
 
 # create a variable for time
 time = strptime(tq$Time, format="%H:%M:%OS"); 
