@@ -1,0 +1,51 @@
+sadkaA = lm(dP ~ psi + eta + dD + dQ, data = tt)
+> summary(sadkaA)
+
+Call:
+lm(formula = dP ~ psi + eta + dD + dQ, data = tt)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-11.5813  -0.0166   0.0079   0.0170   7.6347 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -3.037e-04  1.688e-04  -1.799  0.07195 .  
+psi          1.691e-02  2.304e-04  73.423  < 2e-16 ***
+eta         -4.419e-07  5.479e-07  -0.807  0.41995    
+dD           2.570e-02  2.428e-04 105.855  < 2e-16 ***
+dQ           1.206e-06  4.046e-07   2.980  0.00288 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.07527 on 198837 degrees of freedom
+  (51 observations deleted due to missingness)
+Multiple R-squared:  0.1587,	Adjusted R-squared:  0.1586 
+F-statistic:  9375 on 4 and 198837 DF,  p-value: < 2.2e-16
+
+> # do the same model using returns instead of price change
+> tt$R = c(NA, diff(log(tt$Price)))
+> sadkaB = lm(R ~ psi + eta + dD + dQ, data = tt)
+> summary(sadkaB)
+
+Call:
+lm(formula = R ~ psi + eta + dD + dQ, data = tt)
+
+Residuals:
+      Min        1Q    Median        3Q       Max 
+-0.078655 -0.000121  0.000059  0.000124  0.060225 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -2.105e-06  1.258e-06  -1.674   0.0942 .  
+psi          1.244e-04  1.716e-06  72.467   <2e-16 ***
+eta         -8.725e-10  4.083e-09  -0.214   0.8308    
+dD           1.923e-04  1.809e-06 106.295   <2e-16 ***
+dQ           5.504e-09  3.015e-09   1.826   0.0679 .  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.0005608 on 198837 degrees of freedom
+  (51 observations deleted due to missingness)
+Multiple R-squared:  0.1577,	Adjusted R-squared:  0.1577 
+F-statistic:  9305 on 4 and 198837 DF,  p-value: < 2.2e-16
