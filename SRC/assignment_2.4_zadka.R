@@ -16,7 +16,7 @@ load("tqAssigment2")
 "
 
 tt = tq[tq$Type == "Trade" & tq$D != 0, 
-        c("Date", "Seconds", "Price", "Volume", "D", "Q")];
+        c("Date", "Seconds", "Mid.Price", "se", "Price", "Volume", "D", "Q")];
 
 
 # calculate the difference, include NA for the first rows
@@ -24,7 +24,7 @@ tt = tq[tq$Type == "Trade" & tq$D != 0,
 tt$dP = c(NA, diff(tt$Price));
 tt$dD = c(NA, diff(tt$D));
 tt$dQ = c(NA, diff(tt$Q));
-# tt: 198893 obs. of 9 variables
+# tt: 198893 obs. of 11 variables
 
 save(tt, file ='ttAssigment2_zadka')
 
@@ -62,4 +62,3 @@ tt$R = c(NA, diff(log(tt$Price)))
 
 sadkaB = lm(R ~ psi + eta + dD + dQ, data = tt)
 summary(sadkaB)
-

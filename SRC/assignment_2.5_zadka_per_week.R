@@ -8,7 +8,7 @@ library(plyr) # install.packages('plyr')
 rm(list = setdiff(ls(), lsf.str()))
 
 load("ttAssigment2_zadka")
-# tt: 198893 obs. of 9 variables
+# tt: 198893 obs. of 11 variables
 
 "
   get the week, 
@@ -17,7 +17,7 @@ load("ttAssigment2_zadka")
     get the week, fromat '%V'
 " 
 tt$week = strftime(as.Date(as.character(tt$Date), format = "%Y%m%d"), format = "%V")
-# tt: 198893 obs. of 10 variables
+# tt: 198893 obs. of 12 variables
 # table(tt$week, tt$Date)
 
 # get weeks in a vector
@@ -42,11 +42,7 @@ tt_all_data = tt
 # data frame for weeks data
 report_per_week <- data.frame(
   order = NaN,
-  week = weeks,
-  obs = NaN,
-  asc_ = NaN, # " the estimated adverse selection costs, asc_ =  Lamda0*psi + Lamda1*eta "
-  opc_ic_ = NaN, # " and the estimated order processing and inventory costs. opc_ic_ = gamma0*D + gama1*Q "
-  se_ = NaN #  " the estimated effective spread   se_ = asc_ + opc_ic_ "
+  week = weeks
 )
 
 # calculate meas for each traiding day
@@ -80,25 +76,34 @@ for(week in weeks){
   gamma1 = sadkaA[["coefficients"]][c('dQ')]
   
   # asc_ =  Lamda0*psi + Lamda1*eta
-  tt$asc_ = lamda0 * tt$psi + lamda1 * tt$eta
+  tt$asc_ = lamda0 * tt$psi + lamda1 * tt$eta 
   
   # opc_ic_ = gamma0*D + gama1*Q
-  tt$opc_ic_ = gamma0 * tt$D + gamma1 * tt$Q
+  tt$opc_ic_ =  gamma0 * tt$D + gamma1 * tt$Q
   
-  # se_ = d*(asc_ + opc_ic_) *** relative to the midpoint
-  tt$se_ = tt$D * (tt$asc_ + tt$opc_ic_)
+  # se_ = d*(asc_ + opc_ic_)
+  tt$se_ = tt$D * (tt$asc_ + tt$opc_ic_) 
   
   # get the average per week
-  report_per_week$lamda0[i] =  lamda0
-  report_per_week$lamda1[i] =  lamda1
-  report_per_week$gamma0[i] =  gamma0
-  report_per_week$gamma1[i] =  gamma1
-  report_per_week$asc_[i] =  mean(tt$asc_, na.rm = T)
-  report_per_week$opc_ic_[i] =  mean(tt$opc_ic_, na.rm = T)
-  report_per_week$se_[i] =  mean(tt$se_, na.rm = T)
+  report_per_week$lamda0[i] = lamda0
+  report_per_week$lamda1[i] = lamda1
+  report_per_week$gamma0[i] = gamma0
+  report_per_week$gamma1[i] = gamma1
+  
+  # Report your estimates in basis points relative to the midpoint
 
-  #report_per_week$zadka_A[i] = sadkaA
-  #report_per_week$zadka_B[i] = sadkaB
+  report_per_week$asc_[i] =
+    10000 * mean(tt$asc_ / tt$Mid.Price, na.rm = T)
+  
+  report_per_week$opc_ic_[i] =
+    10000 * mean(tt$opc_ic_ / tt$Mid.Price, na.rm = T)
+  
+  report_per_week$se_[i] =
+    10000 * mean(tt$se_ / tt$Mid.Price, na.rm = T)
+  
+  # avg effective spread calculated 
+  report_per_week$se_calc[i] = 10000 * mean(tt$se, na.rm = T)
+
 }
 
 report_per_week
